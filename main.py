@@ -66,7 +66,7 @@ def select_images():
 
     if images:
         result = messagebox.askquestion("Organize images",
-                                        "Are you sure you want to organize: {} images".format(count),
+                                        "Are you sure you want to organize: {} imagesip".format(count),
                                         icon='warning')
         if result == 'yes':
             organize_images(images)
