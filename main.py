@@ -108,7 +108,7 @@ def delete_temp_icon():
 atexit.register(delete_temp_icon)
 
 root = tk.Tk()
-root.title("Main Window")
+root.title("Image sorter")
 
 root.iconbitmap('temp_icon.ico')
 
