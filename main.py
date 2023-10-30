@@ -53,6 +53,8 @@ def organize_images(images):
         destination_path = os.path.join(day_folder, os.path.basename(image_path))
         shutil.move(image_path, destination_path)
 
+    messagebox.showinfo("Complete", "Images are sorted.")
+
 
 def select_images():
     images = filedialog.askopenfilenames(
