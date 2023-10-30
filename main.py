@@ -58,13 +58,20 @@ def select_images():
     images = filedialog.askopenfilenames(
         title="Select Images",
         filetypes=(
-            ("Img files", ("*.png", "*.jpg", "*.web")),
+            ("Img files", (".png", ".jpg", ".web", "*.raw", "*.jpeg", "*.tiff", "*.tif")),
             ("All Files", "*.*")
         )
     )
+    count = len(images)
 
     if images:
-        organize_images(images)
+        result = messagebox.askquestion("Organize images",
+                                        "Are you sure you want to organize: {} images".format(count),
+                                        icon='warning')
+        if result == 'yes':
+            organize_images(images)
+        else:
+            return
     else:
         messagebox.showinfo("Info", "No images selected.")
 
@@ -72,7 +79,7 @@ def select_images():
 def select_folder():
     folder = filedialog.askdirectory(title="Select a Folder with Images")
     images = [os.path.join(folder, filename) for filename in os.listdir(folder) if
-              filename.lower().endswith((".png", ".jpg", ".web"))]
+              filename.lower().endswith((".png", ".jpg", ".web", "*.raw", "*.jpeg", "*.tiff", "*.tif"))]
     count = len(images)
 
     if images:
