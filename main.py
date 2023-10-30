@@ -7,7 +7,28 @@ import shutil
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter import ttk
+from PIL import Image
+from PIL.ExifTags import TAGS
 
+APP_VERSION = "1.0"
+DEVELOPER_NAME = "Programmer-Timmy"
+
+def get_image_taken_date(image_path):
+    try:
+        img = Image.open(image_path)
+        exif_data = img._getexif()
+        if exif_data:
+            for tag, value in exif_data.items():
+                if TAGS.get(tag) == 'DateTimeOriginal':
+                    c_time = datetime.datetime.strptime(value, "%Y:%m:%d %H:%M:%S")
+                    c_year = c_time.year
+                    c_month = c_time.month
+                    c_day = c_time.day
+                    return c_year, c_month, c_day
+    except (AttributeError, KeyError):
+        pass
+
+    return None, None, None
 
 def organize_images(images):
     # Create a mapping from month numbers to month names
@@ -29,16 +50,10 @@ def organize_images(images):
     image_info = []  # Create a list to store image path and creation date
 
     for x in images:
-        path = pathlib.Path(x)
+        c_year, c_month, c_day = get_image_taken_date(x)
 
-        current_timestamp = path.stat().st_ctime
-
-        c_time = datetime.datetime.fromtimestamp(current_timestamp)
-        c_year = c_time.year
-        c_month = c_time.month
-        c_day = c_time.day
-
-        image_info.append((x, c_year, c_month, c_day))  # Store image path and creation date
+        if c_year is not None:
+            image_info.append((x, c_year, c_month, c_day))
 
     for image_path, year, month, day in image_info:
         # Create subdirectories for each year, month, and day in the same location as the original images
