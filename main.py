@@ -17,13 +17,17 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import datetime
 
+use_month_names = True  # Set to True to use month names, False to use numbers
+
 def get_image_taken_date(image_path):
     try:
         img = Image.open(image_path)
         exif_data = img.getexif()
         if not exif_data:
-            print("Geen EXIF-data gevonden.")
-            return None, None, None
+            file_stat = os.stat(image_path)
+            creation_time = datetime.datetime.fromtimestamp(file_stat.st_ctime)
+            print(f"Gebruik van bestandsinformatie: {creation_time}")
+            return creation_time.year, creation_time.month, creation_time.day
 
         # Probeer meerdere tijd-tags
         for tag_id in [36867, 36868, 306]:  # DateTimeOriginal, DateTimeDigitized, DateTime
@@ -69,7 +73,7 @@ def organize_images(images):
     for image_path, year, month, day in image_info:
         # Create subdirectories for each year, month, and day in the same location as the original images
         year_folder = os.path.join(os.path.dirname(image_path), str(year))
-        month_name = month_names[month]
+        month_name = month_names[month] if use_month_names else str(month)
         month_folder = os.path.join(year_folder, month_name)
         day_folder = os.path.join(month_folder, str(day))
 
@@ -137,17 +141,24 @@ def undo():
 
         for dir in dirs:
             dir_path = os.path.join(root, dir)
-            try:
-                os.rmdir(dir_path)  # Remove the directory if it's empty
-            except OSError:
-                pass
-
+            remove_directory(dir_path)
     # Remove the now empty folder
     try:
         os.rmdir(folder)
         messagebox.showinfo("Complete", "Undo operation completed.")
     except OSError:
         messagebox.showerror("Error", "Could not remove the folder. It may not be empty or does not exist.")
+
+def remove_directory(path: str):
+    """Remove a directory and all its contents."""
+    if os.path.exists(path):
+        # check if other dir are in this one
+        if os.listdir(path):
+            remove_directory(path)
+
+        shutil.rmtree(path)
+    else:
+        print(f"Directory {path} does not exist.")
 
 
 icon_base64 = """
@@ -191,5 +202,13 @@ button_folder.pack(side=tk.LEFT)
 
 button_undo = ttk.Button(frame, text="Undo", compound=tk.TOP, command=undo)
 button_undo.pack(side=tk.LEFT)
+
+# checkbock of usage of month names
+check_var = tk.BooleanVar(value=use_month_names)
+checkbutton = ttk.Checkbutton(root, text="Use Month Names", variable=check_var,
+                               command=lambda: globals().__setitem__('use_month_names', check_var.get()))
+checkbutton.pack(pady=10)
+
+
 
 root.mainloop()
