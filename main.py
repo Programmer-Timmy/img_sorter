@@ -17,7 +17,9 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import datetime
 
-use_month_names = True  # Set to True to use month names, False to use numbers
+use_month_names = False  # Set to True to use month names, False to use numbers
+sort_videos = False
+sort_pictures = True
 
 def get_image_taken_date(image_path):
     try:
@@ -134,7 +136,7 @@ def undo():
         return
 
     parent_folder = os.path.dirname(folder)
-    for root, dirs, files in os.walk(folder):
+    for root, dirs, files in os.walk(folder, topdown=False):
         for file in files:
             file_path = os.path.join(root, file)
             shutil.move(file_path, parent_folder)
@@ -148,14 +150,11 @@ def undo():
         messagebox.showinfo("Complete", "Undo operation completed.")
     except OSError:
         messagebox.showerror("Error", "Could not remove the folder. It may not be empty or does not exist.")
-
+    except Exception as e:
+        messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 def remove_directory(path: str):
     """Remove a directory and all its contents."""
     if os.path.exists(path):
-        # check if other dir are in this one
-        if os.listdir(path):
-            remove_directory(path)
-
         shutil.rmtree(path)
     else:
         print(f"Directory {path} does not exist.")
@@ -207,6 +206,12 @@ button_undo.pack(side=tk.LEFT)
 check_var = tk.BooleanVar(value=use_month_names)
 checkbutton = ttk.Checkbutton(root, text="Use Month Names", variable=check_var,
                                command=lambda: globals().__setitem__('use_month_names', check_var.get()))
+
+# # checkboxs of sorting of video's
+# check_sv_var = tk.BooleanVar(value=sort_videos)
+# checkbutton_sv = ttk.Checkbutton(root, text="Sort Videos", variable=check_sv_var,
+#                                  command=lambda: globals().__setitem__('sort_videos', check_sv_var.get()))
+
 checkbutton.pack(pady=10)
 
 
